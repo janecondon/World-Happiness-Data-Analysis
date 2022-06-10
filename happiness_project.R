@@ -4,7 +4,12 @@ library(tidyverse)
 library(ggplot2)
 library(spData)
 library(sf)
-library(rworldmap)
+library(fastDummies)
+library(corrplot)
+library(rpart)
+library(rattle)
+library(caret)
+library(leaps)
 
 # Importing the data
 
@@ -84,46 +89,45 @@ full_df <- na.omit(full_df)
 
 #Exploratory data analysis
 
-#Creating scatterplots of happiness score vs. different factors
+#Checking which countries and regions have the highest happiness scores
+#Getting rid of duplicates (only using highest score for each country)
 
-#Creating a function that creates a scatterplot with happiness score on the y axis
-#and whatever variable (gdp, social support, freedom, etc) is inputted into 
-#the function on the x-axis
+happiest <- full_df[order(-full_df$happy_score),] #Sorting score from high to low
+happiest <- happiest %>% distinct(country, .keep_all = TRUE) #Removing duplicates
+top_20_countries <- head(happiest$country, 20) #Taking top 20 countries
+top_20_region <- head(happiest$region, 20) #Including region
+top_20_scores <- head(happiest$happy_score, 20) #Taking top 20 scores
+top_20 <- cbind.data.frame(top_20_countries,top_20_region,top_20_scores)
 
-happy_plot <- function(var, title, xlab, ylab)
-{
-  plot <- ggplot(full_df, aes(x=var, y=happy_score, color=region)) +
-    geom_point() + labs(title=title, x=xlab, y=ylab) + 
-    scale_color_brewer(palette="Spectral") + theme_minimal() + 
-    guides(col=guide_legend("Region of the World"))
-  print(plot)
-}
+#Creating a bar plot to display the happiness scores of the 20 happiest countries
 
-#Creating a plot for happiness score vs life expectancy
-
-happy_plot(full_df$life_expectancy, "Happiness Score vs. Life Expectancy", "Life Expectancy Score", "Happiness Score")
-
-#Creating a plot for happiness score vs GDP
-
-happy_plot(full_df$gdp, "Happiness Score vs. GDP", "GDP Score", "Happiness Score")
-
-#Creating a plot for happiness score vs social support
-
-happy_plot(full_df$social_support, "Happiness Score vs. Social Support", "Social Support Score", "Happiness Score")
-
-#Creating a plot for happiness score vs freedom
-
-happy_plot(full_df$freedom, "Happiness Score vs. Freedom", "Freedom Score", "Happiness Score")
-
-#Creating a plot for happiness score vs trust in government
-
-happy_plot(full_df$trust, "Happiness Score vs. Trust in Goverment", "Trust Score", "Happiness Score")
-
-#Creating a plot for happiness score vs generosity
-
-happy_plot(full_df$generosity,"Happiness Score vs. Generosity", "Generosity Score", "Happiness Score")
+top_20_plot <- ggplot(top_20, aes(x=reorder(top_20_countries,top_20_scores), y=top_20_scores, fill=top_20_region)) +
+  geom_bar(stat = "identity",color="black")+
+  geom_text(aes(label=round(top_20_scores,2)),vjust=0.5,hjust=1.2,color="black",  position = position_dodge(0.9),
+            size=3.5) +
+  labs(title="Top 20 Happiest Countries",x = "Country",y = "Happiness Score") +
+  scale_fill_brewer(name = "Region of the World",palette = "Pastel2") +
+  theme_minimal() + coord_flip()
+print(top_20_plot)
 
 
+#Checking which countries and regions have the lowest happiness scores
+
+least_happy <- full_df[order(full_df$happy_score),] #Sorting score in ascending order
+least_happy <- least_happy %>% distinct(country, .keep_all = TRUE) #Removing duplicates
+bot_20_countries <- head(least_happy$country, 20) #Taking bottom 20 countries
+bot_20_region <- head(least_happy$region, 20) #Including region
+bot_20_scores <- head(least_happy$happy_score, 20) #Taking bottom 20 scores
+bot_20 <- cbind.data.frame(bot_20_countries,bot_20_region,bot_20_scores)
+
+bot_20_plot <- ggplot(bot_20, aes(x=reorder(bot_20_countries,-bot_20_scores), y=bot_20_scores, fill=bot_20_region)) +
+  geom_bar(stat = "identity",color="black")+
+  geom_text(aes(label=round(bot_20_scores,2)),vjust=0.5,hjust=1.2,color="black",  position = position_dodge(0.9),
+            size=3.5) +
+  labs(title="20 Least Happy Countries",x = "Country",y = "Happiness Score") +
+  scale_fill_brewer(name = "Region of the World",palette = "Pastel1") +
+  theme_minimal() + coord_flip()
+print(bot_20_plot)
 
 #Visualizing the data on a map
 
@@ -191,6 +195,78 @@ happy_map(merged_df$trust, "Trust in Government", "Spectral")
 
 happy_map(merged_df$generosity, "Generosity", "RdPu")
 
+#Creating scatterplots of happiness score vs. different factors
+
+#Creating a function that creates a scatterplot with happiness score on the y axis
+#and whatever variable (gdp, social support, freedom, etc) is inputted into 
+#the function on the x-axis
+
+happy_plot <- function(var, title, xlab, ylab)
+{
+  plot <- ggplot(full_df, aes(x=var, y=happy_score, color=region)) +
+    geom_point() + labs(title=title, x=xlab, y=ylab) + 
+    scale_fill_brewer(palette="Spectral") + theme_minimal() + 
+    guides(col=guide_legend("Region of the World"))
+  print(plot)
+}
+
+#Creating a plot for happiness score vs life expectancy
+
+happy_plot(full_df$life_expectancy, "Happiness Score vs. Life Expectancy", "Life Expectancy Score", "Happiness Score")
+
+#Creating a plot for happiness score vs GDP
+
+happy_plot(full_df$gdp, "Happiness Score vs. GDP", "GDP Score", "Happiness Score")
+
+#Creating a plot for happiness score vs social support
+
+happy_plot(full_df$social_support, "Happiness Score vs. Social Support", "Social Support Score", "Happiness Score")
+
+#Creating a plot for happiness score vs freedom
+
+happy_plot(full_df$freedom, "Happiness Score vs. Freedom", "Freedom Score", "Happiness Score")
+
+#Creating a plot for happiness score vs trust in government
+
+happy_plot(full_df$trust, "Happiness Score vs. Trust in Goverment", "Trust Score", "Happiness Score")
+
+#Creating a plot for happiness score vs generosity
+
+happy_plot(full_df$generosity,"Happiness Score vs. Generosity", "Generosity Score", "Happiness Score")
+
+
+
+#Determining the correlation between happiness score and various independent variables
+
+#Creating subset of the dataframe with only happiness score and independent variables
+
+df_subset <- subset(full_df, select = c(happy_score,gdp,life_expectancy, social_support, freedom, trust, generosity))
+
+#Constructing correlation matrix
+
+cor_mat <- round(cor(df_subset),2) 
+colnames(cor_mat) <- c("Happiness Score", "GDP", "Life Expectancy", "Social Support",
+                       "Freedom", "Trust", "Generosity")
+rownames(cor_mat) <- c("Happiness Score", "GDP", "Life Expectancy", "Social Support",
+                       "Freedom", "Trust", "Generosity")
+
+#Plotting the correlation matrix
+
+cor_plot <- corrplot(cor_mat, method = 'square', title= "Correlation Between Different Factors", 
+                     mar=c(1,1,2,1), order = "AOE",
+                     col.lim = c(-0.03,1),tl.col="black", 
+                     tl.pos="lt", col=COL1("Reds"),
+                     cl.pos='b',cl.ratio=0.1, addgrid.col="white",addCoef.col = 'black')
+print(cor_plot)
+
+
+#Potential problem: gdp, life expectancy, and social support are very strongly
+#correlated amongst each other -- all characteristics of developed countries
+
+#Scaling the data for linear regression
+
+df_scale <- as.data.frame(scale(full_df[,5:11],center=TRUE,scale=TRUE))
+df_scale['region'] <- full_df['region'] #Adding region back into the dataframe
 
 
 #Determining the relationship between happiness score and various independent variables
@@ -201,5 +277,41 @@ happy_map(merged_df$generosity, "Generosity", "RdPu")
 
 
 happy_reg <- lm(happy_score ~ gdp + social_support + life_expectancy + freedom + trust + generosity,
-            data = full_df)
+             data = df_scale)
 summary(happy_reg)
+
+#Creating dummy variables for region
+
+full_df_dummies <- dummy_cols(df_scale, select_columns = 'region')
+
+#Improved linear regression model > happiness score = gdp + social support + 
+#life expectancy + freedom + trust in government + generosity + region (+error term)
+
+happy_reg_2 <- lm(happy_score ~ gdp + social_support + life_expectancy + freedom +
+                    trust + generosity + region, data = full_df_dummies)
+summary(happy_reg_2)
+
+
+#Stepwise regression model using k-fold cross validation
+
+set.seed(123)
+train.control <- trainControl(method = "cv", number = 10)
+step_model <- train(happy_score ~ gdp + social_support + life_expectancy + 
+                     freedom + trust + generosity, data = df_scale,
+                   method = "leapSeq", 
+                   tuneGrid = data.frame(nvmax = 1:6),
+                   trControl = train.control
+)
+
+summary(step_model$finalModel) #Displaying the results of the model
+step_model$bestTune #Checking which model is the best out of the 6
+
+
+#Regression tree model
+
+happy_tree <- rpart(happy_score ~ gdp + social_support + life_expectancy + freedom + trust + generosity, data = df_scale)
+happy_tree_plot <- fancyRpartPlot(happy_tree, main = "Happiness Score", sub = "", palettes = "PuBuGn")
+print(happy_tree_plot)
+
+
+
