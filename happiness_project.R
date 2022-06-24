@@ -105,13 +105,14 @@ top_20_plot <- ggplot(top_20, aes(x=reorder(top_20_countries,top_20_scores), y=t
   geom_bar(stat = "identity",color="black")+
   geom_text(aes(label=round(top_20_scores,2)),vjust=0.5,hjust=1.2,color="black",  position = position_dodge(0.9),
             size=3.5) +
-  labs(title="Top 20 Happiest Countries",x = "Country",y = "Happiness Score") +
+  labs(title="20 Happiest Countries",x = "Country",y = "Happiness Score") +
   scale_fill_brewer(name = "Region of the World",palette = "Pastel2") +
   theme_minimal() + coord_flip()
 print(top_20_plot)
 
 
 #Checking which countries and regions have the lowest happiness scores
+#Getting rid of duplicates (only using lowest score for each country)
 
 least_happy <- full_df[order(full_df$happy_score),] #Sorting score in ascending order
 least_happy <- least_happy %>% distinct(country, .keep_all = TRUE) #Removing duplicates
@@ -128,6 +129,33 @@ bot_20_plot <- ggplot(bot_20, aes(x=reorder(bot_20_countries,-bot_20_scores), y=
   scale_fill_brewer(name = "Region of the World",palette = "Pastel1") +
   theme_minimal() + coord_flip()
 print(bot_20_plot)
+
+
+#Looking at happiness score over time
+
+
+
+m2015 <- mean(data_2015$happy_score)
+m2016 <- mean(data_2016$happy_score)
+m2017 <- mean(data_2017$happy_score)
+m2018 <- mean(data_2018$happy_score)
+m2019 <- mean(data_2019$happy_score)
+
+yr <- c(2015,2016,2017,2018,2019)
+m <- c(m2015,m2016,m2017,m2018,m2019)
+time_df <- data.frame(yr,m)
+
+#Plotting the mean happiness score from 2015 to 2019
+
+happy_line <- ggplot(data=time_df, aes(x=yr, y=m, group=1)) +
+  geom_line(color="aquamarine4",lwd=1)+
+  geom_point(color="lightcyan3",lwd=3) + theme_minimal() + labs(title="Mean Happiness Score Over Time",
+                                                    x="Year",y="Mean Happiness Score") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+print(happy_line)
+
+
 
 #Visualizing the data on a map
 
@@ -157,43 +185,58 @@ merged_df <- merged_df %>% distinct(geometry,.keep_all=TRUE)
 #Creating a function that creates a map for different variables for the most recent year
 #that data is present for each country
 
-happy_map <- function(var,title,color)
+happy_map <- function(var,title,color,name)
 {
   map <- ggplot() +
     geom_sf(data=merged_df, aes(fill=var,geometry=geometry)) +
     scale_fill_distiller(palette=color) +
-    ggtitle(title)
+    ggtitle(title) + theme(plot.title = element_text(hjust = 0.5)) + labs(fill=name)
   print(map)
   
 }
 
 #Creating a map displaying happiness score across the world
 
-happy_map(merged_df$happy_score,"Happiness Score","YlOrRd")
+happy_map(merged_df$happy_score,"Happiness Score Around the World","BuGn","Happiness Score")
 
 #Creating a map displaying life expectancy across the world
 
-happy_map(merged_df$life_expectancy, "Life Expectancy","YlGnBu")
+happy_map(merged_df$life_expectancy, "Healthy Life Expectancy","YlGnBu","Life Expectancy Score")
 
 #Creating a map displaying gdp across the world
 
-happy_map(merged_df$gdp, "GDP", "PuBuGn")
+happy_map(merged_df$gdp, "GDP", "PuBuGn","Logged GDP")
 
 #Creating a map displaying social support across the world
 
-happy_map(merged_df$social_support, "Social Support", "BuPu")
+happy_map(merged_df$social_support, "Social Support / Family", "BuPu", "Social Support Score")
 
 #Creating a map displaying freedom across the world
 
-happy_map(merged_df$freedom, "Freedom", "PuRd")
+happy_map(merged_df$freedom, "Freedom to Make Life Choices", "PuRd", "Freedom Score")
 
 #Creating a map displaying trust in government 
 
-happy_map(merged_df$trust, "Trust in Government", "Spectral")
+happy_map(merged_df$trust, "Trust in Government", "Greens", "Trust Score")
 
 #Creating a map displaying generosity
 
-happy_map(merged_df$generosity, "Generosity", "RdPu")
+happy_map(merged_df$generosity, "Generosity", "Purples", "Generosity Score")
+
+
+#Creating a violin plot of happiness score to further examine how happiness score
+#differs by region
+
+violin_plot <- ggplot(full_df,aes(x=region,y=happy_score))+
+  geom_violin(aes(fill=factor(region)),alpha=0.4,width=5)+
+  theme(plot.title = element_text(hjust = 0.5),axis.text.x = element_text(angle=90, vjust=0.8)) + 
+  labs(title="Happiness Score by Region",x="Region",y="Happiness Score",fill="Region") + 
+  scale_fill_brewer(palette="PiYG") + 
+  stat_summary(fun = "mean",geom = "point", width = 0.5,color = "blue4") 
+print(violin_plot)
+
+
+#Evaluating the relationship between happiness score and various independent variables
 
 #Creating scatterplots of happiness score vs. different factors
 
@@ -206,7 +249,8 @@ happy_plot <- function(var, title, xlab, ylab)
   plot <- ggplot(full_df, aes(x=var, y=happy_score, color=region)) +
     geom_point() + labs(title=title, x=xlab, y=ylab) + 
     scale_fill_brewer(palette="Spectral") + theme_minimal() + 
-    guides(col=guide_legend("Region of the World"))
+    guides(col=guide_legend("Region of the World")) + 
+    theme(plot.title = element_text(hjust = 0.5))
   print(plot)
 }
 
@@ -216,7 +260,7 @@ happy_plot(full_df$life_expectancy, "Happiness Score vs. Life Expectancy", "Life
 
 #Creating a plot for happiness score vs GDP
 
-happy_plot(full_df$gdp, "Happiness Score vs. GDP", "GDP Score", "Happiness Score")
+happy_plot(full_df$gdp, "Happiness Score vs. GDP", "Logged GDP", "Happiness Score")
 
 #Creating a plot for happiness score vs social support
 
@@ -252,10 +296,10 @@ rownames(cor_mat) <- c("Happiness Score", "GDP", "Life Expectancy", "Social Supp
 
 #Plotting the correlation matrix
 
-cor_plot <- corrplot(cor_mat, method = 'square', title= "Correlation Between Different Factors", 
+cor_plot <- corrplot(cor_mat, method = 'circle', title= "Correlation Between Different Factors", 
                      mar=c(1,1,2,1), order = "AOE",
                      col.lim = c(-0.03,1),tl.col="black", 
-                     tl.pos="lt", col=COL1("Reds"),
+                     tl.pos="lt", col=COL1("Greens"),
                      cl.pos='b',cl.ratio=0.1, addgrid.col="white",addCoef.col = 'black')
 print(cor_plot)
 
@@ -269,16 +313,31 @@ df_scale <- as.data.frame(scale(full_df[,5:11],center=TRUE,scale=TRUE))
 df_scale['region'] <- full_df['region'] #Adding region back into the dataframe
 
 
-#Determining the relationship between happiness score and various independent variables
-#using various methods
+#Stepwise regression model using k-fold cross validation
 
-#Ordinary linear regression model > happiness score = gdp + social support +
+set.seed(123)
+train.control <- trainControl(method = "cv", number = 10)
+step_model <- train(happy_score ~ gdp + social_support + life_expectancy + 
+                      freedom + trust + generosity, data = df_scale,
+                    method = "leapSeq", 
+                    tuneGrid = data.frame(nvmax = 1:6),
+                    trControl = train.control
+)
+
+summary(step_model$finalModel) #Displaying the results of the model
+step_model$bestTune #Checking which model is the best out of the 6
+
+#Showing the coefficients of the final model
+
+#Final model > happiness score = gdp + social support +
 #life expectancy + freedom + trust in government + generosity (+error term)
 
 
 happy_reg <- lm(happy_score ~ gdp + social_support + life_expectancy + freedom + trust + generosity,
              data = df_scale)
 summary(happy_reg)
+
+#Adding region dummy variables into the model
 
 #Creating dummy variables for region
 
@@ -291,21 +350,7 @@ happy_reg_2 <- lm(happy_score ~ gdp + social_support + life_expectancy + freedom
                     trust + generosity + region, data = full_df_dummies)
 summary(happy_reg_2)
 
-
-#Stepwise regression model using k-fold cross validation
-
-set.seed(123)
-train.control <- trainControl(method = "cv", number = 10)
-step_model <- train(happy_score ~ gdp + social_support + life_expectancy + 
-                     freedom + trust + generosity, data = df_scale,
-                   method = "leapSeq", 
-                   tuneGrid = data.frame(nvmax = 1:6),
-                   trControl = train.control
-)
-
-summary(step_model$finalModel) #Displaying the results of the model
-step_model$bestTune #Checking which model is the best out of the 6
-
+#Using one final approach: a regression tree
 
 #Regression tree model
 
