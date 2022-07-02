@@ -10,14 +10,15 @@ library(rpart)
 library(rattle)
 library(caret)
 library(leaps)
+library(sjPlot)
 
 # Importing the data
 
-data_2015 <- read_csv("2015.csv")
-data_2016 <- read_csv("2016.csv")
-data_2017 <- read_csv("2017.csv")
-data_2018 <- read_csv("2018.csv")
-data_2019 <- read_csv("2019.csv")
+data_2015 <- read_csv("Data/2015.csv")
+data_2016 <- read_csv("Data/2016.csv")
+data_2017 <- read_csv("Data/2017.csv")
+data_2018 <- read_csv("Data/2018.csv")
+data_2019 <- read_csv("Data/2019.csv")
 
 #Cleaning up the data
 
@@ -337,13 +338,23 @@ happy_reg <- lm(happy_score ~ gdp + social_support + life_expectancy + freedom +
              data = df_scale)
 summary(happy_reg)
 
-#Adding region dummy variables into the model
+#Creating a table to show results
+
+my_table <- tab_model(happy_reg, digits = 3, show.ci = F, show.stat = T, 
+                              show.se = T, p.style = "stars",
+                              pred.labels = c("(Intercept)", "GDP","Social Support",
+                                              "Healthy Life Expectancy","Freedom",
+                                              "Trust in Government","Generosity"),
+                      title = "Final Model", dv.labels = c(""))
+print(my_table)
+
+#Adding region dummy variables into the model to control for region
 
 #Creating dummy variables for region
 
 full_df_dummies <- dummy_cols(df_scale, select_columns = 'region')
 
-#Improved linear regression model > happiness score = gdp + social support + 
+#Additional linear regression model > happiness score = gdp + social support + 
 #life expectancy + freedom + trust in government + generosity + region (+error term)
 
 happy_reg_2 <- lm(happy_score ~ gdp + social_support + life_expectancy + freedom +
