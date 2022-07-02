@@ -52,3 +52,40 @@ what type of impact and how strong of an impact do they have? Which factors have
 
 * **How have Happiness Scores Changed Over Time?** : As a whole, has the world gotten happier, or unhappier, in the period from 2015 to 2019?
 
+
+## Findings
+
+### 20 Happiest and Least Happy Countries
+
+<img src="Plots/Happiest_Countries.png" width="475"/> <img src="Plots/Unhappiest_Countries.png" width="475"/> 
+
+
+* **Happpiest**: As the plots above show, a large portion of the top 20 happiest countries are located in Western Europe. Citizens of North America and the Australia/New Zealand region
+also appear to be very happy, with all 4 countries from those 2 regions being part of the top 20. There were also a few countries from Latin America and one country (Israel) from the Middle East/North Africa region mixed in. 
+
+* **Unhappiest**: As for the most unhappy countries, an overwhelmingly large majority of the 20 unhappiest countries were located in the Sub-Saharan Africa region. 
+Only 4 of the countries in this category were located in a region other than Sub-Saharan Africa, with two of the unhappiest countries being located in the Middle East/
+Northern Africa region, one located in Southern Asia, and one located in Latin America. 
+
+**Note:** To obtain these results, only the highest score for each country (out of all 5 years) was considered to determine the top 20 happiest countries, and only
+the lowest score for each country (out of all 5 years) was considered to determine the bottom 20 countries.
+
+
+### How the Happiness Score Differs by Region
+
+<p align="center">
+  <img width="600" height="400" src="Plots/Happy_Score_Map.png">
+</p>
+
+The map above shows happiness scores for different countries across the world, with happier countries being assigned a lighter color and unhappier countries being
+assigned a darker color. According to the map, it appears as though Western Europe, North America, and the Australia/New Zealand Region are the happiest overall. 
+Latin America, Central/Eastern Europe, and Eastern Asia appear to have moderate happiness scores. Countries located in South Asia and the Middle East/Northern Africa region appear to have relatively low happiness scores. The majority of the countries located in Sub-Saharan Africa have exceptionally low happiness scores.
+
+
+<p align="center">
+  <img width="700" height="400" src="Plots/Violin_Plot.png">
+</p>
+
+ This violin plot gives us a slightly better picture of how happiness scores are distributed in different regions. While countries in North America, Australia/NZ region, and East Asia have very little variation in happiness score, regions like the Middle East/North Africa and Latin America have very large differences in
+ happiness score between their happiest and unhappiest countries. Interestingly enough, both of those regions have at least one country in the top 20 and at least one
+ country in the bottom 20 as well. 
