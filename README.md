@@ -57,7 +57,7 @@ what type of impact and how strong of an impact do they have? Which factors have
 
 ### 20 Happiest and Least Happy Countries
 
-<img src="Plots/Happiest_Countries.png" width="475"/> <img src="Plots/Unhappiest_Countries.png" width="475"/> 
+<img src="Plots/Happiest_Countries.png" width="425"/> <img src="Plots/Unhappiest_Countries.png" width="425"/> 
 
 
 * **Happpiest**: As the plots above show, a large portion of the top 20 happiest countries are located in Western Europe. Citizens of North America and the Australia/New Zealand region
