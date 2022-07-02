@@ -11,7 +11,7 @@ answer the question above.
 
 ## The Data
 
-All of the data used in this project comes directly from Kaggle.com. There are five datasets used in this project (World Happiness Report for 2015, 2016,
+All of the data used in this project comes directly from [Kaggle.com](https://www.kaggle.com/datasets/unsdsn/world-happiness). There are five datasets used in this project (World Happiness Report for 2015, 2016,
 2017, 2018, and 2019), which were merged together into one large dataset for easier analysis. To run the code, make sure to download each of the csv files located in the folder titled "Data".
 
 #### Response Variable (what we're trying to predict)
