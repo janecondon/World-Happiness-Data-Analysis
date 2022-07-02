@@ -24,7 +24,7 @@ on that scale. A country's happiness score is calculated by taking the national 
 
 #### Explanatory Variables Explored
 
-* Healthy Life Expectancy: 
+* Healthy Life Expectancy
 
 * GDP
 
@@ -83,9 +83,43 @@ Latin America, Central/Eastern Europe, and Eastern Asia appear to have moderate 
 
 
 <p align="center">
-  <img width="700" height="400" src="Plots/Violin_Plot.png">
+  <img width="600" height="400" src="Plots/Violin_Plot.png">
 </p>
 
  This violin plot gives us a slightly better picture of how happiness scores are distributed in different regions. While countries in North America, Australia/NZ region, and East Asia have very little variation in happiness score, regions like the Middle East/North Africa and Latin America have very large differences in
  happiness score between their happiest and unhappiest countries. Interestingly enough, both of those regions have at least one country in the top 20 and at least one
  country in the bottom 20 as well. 
+ 
+ 
+ ### Determining Which Factors Influence a Country's Happiness Score
+ 
+ #### The Plots
+ 
+ <img src="Plots/GDP_Plot.png" width="350"/> <img src="Plots/Freedom_Plot.png" width="350"/> 
+ 
+ <img src="Plots/Life_Exp_Plot.png" width="350"/> <img src="Plots/Social_Support_Plot.png" width="350"/> 
+ 
+ <img src="Plots/Trust_Plot.png" width="350"/> <img src="Plots/Generosity_Plot.png" width="350"/> 
+ 
+ 
+ 
+ 
+ 
+ #### The Models
+ 
+<img src="Plots/Happy_Reg_Model.png" width="450"/> <img src="Plots/Happiness_Tree.png" width="450"/> 
+
+
+
+To answer the question above, two different approaches were taken. The image on the left displays the coefficients of the final model obtained using stepwise regression. The image on the right displays a regression tree. In both models, GDP is the most important factor in predicting a country's happiness score; a country with a higher GDP will have a higher happiness score. Freedom to make life choices, healthy life expectancy, and social support also appear to have a strong positive influence on a country's happiness score. While trust in government and generosity may have a slight influence on happiness score, it's very small compared to the influence that the 4 other factors have on a country's happiness score. The plots show similar results; GDP, healthy life expectancy, freedom to make life choices,
+and social support apppear to have a strong correlation with happiness score, while generosity and trust in government did not appear to have much of a relationship
+with a country's happiness score.
+
+
+### Happiness Scores over Time
+
+<p align="center">
+  <img width="600" height="400" src="Plots/Happiness_Over_Time.png">
+</p>
+
+Over a span of 4 years, happiness scores haven't changed very much. The average happiness score has increased from 5.38 in 2015 to 5.41 in 2019. 2019 was the happiest year with a score of 5.41, and 2017 was the unhappiest year with an average score of 5.35.
